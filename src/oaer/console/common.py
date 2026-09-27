@@ -23,7 +23,7 @@ class ParsedInvocation:
     overrides: tuple[str, ...]
     report: Path | None
     emit: bool
-    no_live: bool = False
+    live: bool = False
     no_study: bool = False
 
 
@@ -41,9 +41,12 @@ def build_parser(description: str) -> argparse.ArgumentParser:
     parser.add_argument("--report", default="")
     parser.add_argument("--print", dest="emit", action="store_true")
     parser.add_argument(
-        "--no-live",
+        "--live",
         action="store_true",
-        help="skip the live resource probes, so the run needs no network",
+        help=(
+            "also probe the auxiliary resources over the network; off by default so a "
+            "run's artefacts stay a pure function of this tree"
+        ),
     )
     parser.add_argument(
         "--no-study",
@@ -61,7 +64,7 @@ def configure_and_parse(description: str, argv: list[str] | None) -> ParsedInvoc
         overrides=tuple(args.overrides),
         report=Path(args.report) if args.report else None,
         emit=bool(args.emit),
-        no_live=bool(args.no_live),
+        live=bool(args.live),
         no_study=bool(args.no_study),
     )
 

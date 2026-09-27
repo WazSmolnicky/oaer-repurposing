@@ -2,7 +2,7 @@
 # Run the verification battery. The manifest is written last, inside the driver,
 # so it digests the finished tree; this script must not write anything after it.
 #
-#   pipelines/verify_release.sh [protocols/main.yaml] [--no-live] [--no-study]
+#   pipelines/verify_release.sh [protocols/main.yaml] [--live] [--no-study]
 set -euo pipefail
 
 PROTOCOL="protocols/main.yaml"

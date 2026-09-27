@@ -70,20 +70,25 @@ no patient row exists in this tree. PAIP2020 is never used as an evidence source
 because its download sits behind a click-through research-use gate.
 
 Nothing has to be downloaded to run the release. The auxiliary resources are read
-only by the live checks:
+only by an opt-in reachability check:
 
-    pipelines/verify_release.sh            # includes the live resource probes
-    pipelines/verify_release.sh --no-live  # offline; the live entries become absent
+    pipelines/verify_release.sh           # the two verification passes, offline
+    pipelines/verify_release.sh --live    # also probe each auxiliary resource
 
-Each probe is retried three times, and one that still cannot be read is reported
-`BLOCKED` with its reason rather than omitted: an unreachable resource and an
-absent row are different statements. Any `BLOCKED` probe leaves the release-level
-verdict at `PARTIALLY_VERIFIED`, which is the honest reading — the tree is not at
-fault, and neither is the resource. Transport from the machine that assembled it is
-not uniform: the GSE39582 series matrix sits on an NCBI FTP host whose TLS
-handshake this Python build abandons with an unexpected EOF, so the system HTTP
-client was used to read that one URL, and that is the read-back `dataset_urls.txt`
-records for it.
+The probes are off by default because their result is not a function of this tree,
+and the artefacts the integrity manifest digests have to be: a run that reaches the
+network produces different bytes on a day a host answers differently, so a clone
+could not reproduce what it was shipped. With `--live` each resource is probed, a
+transport failure is retried three times, and the outcome is reported as `PASS`,
+`PARTIAL` or `BLOCKED` with its reason — never omitted, because an unreachable
+resource and an absent row are different statements. A `BLOCKED` probe leaves that
+run's release verdict at `PARTIALLY_VERIFIED` while the code and manuscript verdicts
+stay untouched. The shipped artefacts are the offline run's.
+
+One transport quirk is worth knowing before reading probe output: the GSE39582
+series matrix sits on an NCBI FTP host whose TLS handshake this Python build
+abandons with an unexpected EOF, so the system HTTP client was used to read that one
+URL, and that is the read-back `dataset_urls.txt` records for it.
 
 The cohort the estimators run on is built from the reported marginals:
 

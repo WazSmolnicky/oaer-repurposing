@@ -7,13 +7,6 @@
       "PARTIAL": 0,
       "PASS": 41
     },
-    "live": {
-      "BLOCKED": 0,
-      "FAIL": 0,
-      "NOT_RUN": 0,
-      "PARTIAL": 0,
-      "PASS": 8
-    },
     "manuscript": {
       "BLOCKED": 0,
       "FAIL": 0,
@@ -282,61 +275,13 @@
       "status": "PASS"
     },
     {
-      "evidence": "https://www.ebi.ac.uk/chembl/api/data/status.json | release date read back as '2026-05-01'",
-      "family": "live",
-      "name": "live_chembl",
-      "status": "PASS"
-    },
-    {
-      "evidence": "https://api.platform.opentargets.org/api/v4/graphql | meta.name read back as 'Open Targets GraphQL & REST API Beta'",
-      "family": "live",
-      "name": "live_open_targets_platform",
-      "status": "PASS"
-    },
-    {
-      "evidence": "https://drugcentral.org/download | page carries 'download'",
-      "family": "live",
-      "name": "live_drugcentral",
-      "status": "PASS"
-    },
-    {
-      "evidence": "https://api.gdc.cancer.gov/projects/TCGA-COAD | project_id read back as 'TCGA-COAD'",
-      "family": "live",
-      "name": "live_gdc_projects_api",
-      "status": "PASS"
-    },
-    {
-      "evidence": "https://www.cbioportal.org/api/studies | 548 studies listed; 'msk_chord_2024' present",
-      "family": "live",
-      "name": "live_cbioportal_studies_api",
-      "status": "PASS"
-    },
-    {
-      "evidence": "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE39nnn/GSE39582/matrix/GSE39582_series_matrix.txt.gz | series matrix carries 'GSE39582'",
-      "family": "live",
-      "name": "live_geo_series_gse39582",
-      "status": "PASS"
-    },
-    {
-      "evidence": "https://zenodo.org/api/records/2530835 | record title 'Histological images for MSI vs. MSS classification in gastro' over 8 file(s); 'CRC_DX' found in the file list (CRC_DX_TEST_MSS.zip)",
-      "family": "live",
-      "name": "live_tcga-crc-dx",
-      "status": "PASS"
-    },
-    {
-      "evidence": "https://zenodo.org/api/records/14047723 | record title 'Patch-level UNI feature embeddings from colorectal cancer wh' over 1 file(s); 'SurGen' found in the title",
-      "family": "live",
-      "name": "live_surgen",
-      "status": "PASS"
-    },
-    {
       "evidence": "the manifest digests the live tree",
       "family": "code",
       "name": "manifest_freshness",
       "status": "PASS"
     },
     {
-      "evidence": "53 checks in the shipped report against the expected minimum of 39",
+      "evidence": "45 checks in the shipped report against the expected minimum of 31",
       "family": "code",
       "name": "report_completeness",
       "status": "PASS"
@@ -349,13 +294,13 @@
     "FAIL": 0,
     "NOT_RUN": 0,
     "PARTIAL": 0,
-    "PASS": 53
+    "PASS": 45
   },
   "environment": {
     "python": "3.14.0",
     "torch": "2.11.0"
   },
-  "live_status": "VERIFIED",
+  "live_status": "NOT_RUN",
   "manuscript_status": "VERIFIED",
   "not_reproduced": [
     "every cohort-level column of the article, whose arm is private and is not redistributed",

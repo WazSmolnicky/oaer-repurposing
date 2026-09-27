@@ -17,9 +17,9 @@
       "sha256": "eed01eee5e018a64047f2f2c8bd91fa3ca96545f07b255c9dafa672258461c5c"
     },
     {
-      "bytes": 702,
+      "bytes": 11498,
       "path": "LICENSE",
-      "sha256": "b1f1e967b15ec2d137dc5a0a5b5ac381b50e0116e328686fa211976e5e5f9726"
+      "sha256": "ed2acaf0e53a30ae62967a6e293137cc248159323e698e6f7814bc905531dc34"
     },
     {
       "bytes": 4311,
@@ -27,9 +27,9 @@
       "sha256": "7ead4ca97ee5b915e47d8aec33fa201899a1df07d5ca1ff708ad8e88aeaaeba0"
     },
     {
-      "bytes": 13666,
+      "bytes": 14041,
       "path": "README.md",
-      "sha256": "ebb76be72229a82e766b8f2b3713c21bffa1b6c803ba1c35bd586ca3d8f72d8c"
+      "sha256": "81359fd6396afcfb95b62ab663628a4f813a00eca70066cf395f396b95c58e18"
     },
     {
       "bytes": 1312,
@@ -82,9 +82,9 @@
       "sha256": "2b0c30fb7ca055f0cfe65df463fc751fea07db39049821b27b0af7a87edb3e10"
     },
     {
-      "bytes": 555,
+      "bytes": 552,
       "path": "pipelines/verify_release.sh",
-      "sha256": "7e199b73db74865a0d4d6e03fa2d20d6a3825aa2be0d084e4db0f5682df8c8da"
+      "sha256": "a2f4a7fc00b7503160aa29f3ac73b1cb73a189bf8d008a00b9403ae38fc188d6"
     },
     {
       "bytes": 2212,
@@ -132,9 +132,9 @@
       "sha256": "bf6849e42dd09479ad227b029ebd332cf9af14baa4e2d9a88a41b84df9ec7800"
     },
     {
-      "bytes": 25526,
+      "bytes": 21829,
       "path": "reports/verification.txt",
-      "sha256": "423cb24b487979cb2eef8ba220fc1948b26522dbf9cae014f9a95b024529c60e"
+      "sha256": "d1da9b949472b4e72dc11624a15d42a3beeb8fe1bc9be023d4a46d29c170ce12"
     },
     {
       "bytes": 89,
@@ -212,9 +212,9 @@
       "sha256": "e4742649e3029d1a99e451b275f1d21f20af96b6dd7adab9ad3d7d29c723d3a6"
     },
     {
-      "bytes": 2781,
+      "bytes": 2872,
       "path": "src/oaer/console/common.py",
-      "sha256": "7d5b9b4161c8b4b107b68dc6a1d67f3264071caa09c7f60f1e8e390c210db55a"
+      "sha256": "51e656ff012e8e9ee8bfd04c76d472f174c40da72ba14319be147e8fa2baa1d7"
     },
     {
       "bytes": 5345,
@@ -237,9 +237,9 @@
       "sha256": "fd332a5129d19e648209cb773a8bf2ac9486e2f390b7215a10844a587fd7d5c4"
     },
     {
-      "bytes": 5547,
+      "bytes": 5759,
       "path": "src/oaer/console/verify.py",
-      "sha256": "ed4c10e96067bcf5bca4a8dc9f5ab2a4f3f8c55fb0f4d4f9e2319d437746346c"
+      "sha256": "f83637380b5c60eebb99b9491fe586bfefd423a6b26b63c08db22a94c27cbe92"
     },
     {
       "bytes": 1034,
@@ -562,9 +562,9 @@
       "sha256": "749124cbf7c05470f2228bb82f2ecbdb7aa0cec6738f27a833bf79a53276b9ca"
     },
     {
-      "bytes": 13176,
+      "bytes": 11202,
       "path": "verification_report.json",
-      "sha256": "ecd64563c2b0d623b1b0cadbc05f546ec81b6cf7ebc6872ababde1ab4561f634"
+      "sha256": "57d0936b62bd2d0869674a39969c0692fd37b1a1f1086821bd733302685d9f04"
     }
   ],
   "root": "oaer-repurposing"

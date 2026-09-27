@@ -68,7 +68,10 @@ def main(argv: list[str] | None = None) -> int:
     )
     set_seed(config.seed)
     LOGGER.info("running the verification battery at %s", root.name)
-    include_live = not invocation.no_live
+    # The resource probes are opt-in. Their result is not a function of this tree,
+    # and an artefact the integrity manifest digests has to be, so a default run
+    # leaves them out and --live adds them on request.
+    include_live = invocation.live
     include_study = not invocation.no_study
     entries = run_battery(claim_map, root, include_live=include_live, include_study=include_study)
     # The last two checks read artefacts this driver writes, so they run here: the
