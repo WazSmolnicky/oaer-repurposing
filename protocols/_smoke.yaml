@@ -1,0 +1,101 @@
+# for unit-test smoke only; do not use for reporting.
+#
+# A short-budget variant that exercises every mechanism on a small cohort. It
+# does not reproduce the deployed protocol and must never be used for a result.
+# The arm is scaled down while keeping the reported composition, so the marginal
+# check reads against the scaled table; the candidate directory, the fold count
+# and the schedules shrink as well.
+
+name: smoke
+
+seed: 7
+
+site_holdout: C
+
+cohort:
+  site_a_decisions: 96
+  site_b_decisions: 84
+  site_c_decisions: 46
+  site_a_prospective_decisions: 34
+  site_b_prospective_decisions: 30
+  site_c_prospective_decisions: 16
+  retrospective_patients: 122
+  prospective_patients: 45
+  decisions_per_patient: 1.84
+  candidate_count: 12
+  exposed_candidates: 0
+  profile_scale: 1.0
+
+catalogue:
+  non_oncology_indications: 24
+  oncology_only_excluded: 4
+  relations: 7
+  anchor_types: 4
+  motif_orders: [2]
+  negative_samples: 4
+  anchor_corruptions: 3
+
+emulation:
+  trimming_epsilon: 0.05
+  minimum_exposed: 8
+  folds: 2
+  censoring_floor: 0.05
+  new_user_lookback_days: 365
+  regularisation: 1.0
+  horizons_months: [8.0, 6.5, 5.5]
+  placebo_candidates: 1
+
+encoder:
+  embedding_dim: 16
+  hidden_dim: 16
+  layers: 1
+  num_basis: 2
+  dropout: 0.0
+  graph_degree_scale: 8.0
+  degree_transfer_gain: 1.0
+
+head:
+  route_dim: 8
+  modifier_dim: 8
+  pathology_only_dim: 8
+  l2_penalty: 1.0e-4
+  outcome_weight_scale: 1.0
+
+gate:
+  miscoverage_alpha: 0.2
+  margin_delta: 0.0
+  rank_depth_k: 2
+  calibration_window_months: 6
+  transport_clip: 10.0
+
+fitting:
+  stage1_epochs: 2
+  stage2_epochs: 2
+  stage3_epochs: 6
+  batch_size: 64
+  learning_rate: 1.0e-2
+  weight_decay: 0.0
+  warmup_steps: 2
+  total_steps: 24
+  grad_clip: 1.0
+  precision: fp32
+  device: cpu
+  early_stop_patience: 0
+
+readings:
+  seeds: [7, 13]
+  bootstrap_resamples: 24
+  bootstrap_confidence: 0.95
+  hits_at: 5
+  ndcg_at: 5
+  jaccard_top: 3
+  landmark_months: 12.0
+
+compute:
+  accelerator: not reported by the manuscript
+  peak_memory_gb: null
+  wall_clock_per_decision_minutes: 11.0
+  wall_clock_interquartile_low: 7.0
+  wall_clock_interquartile_high: 18.0
+  frozen_throughput_percent: 96.4
+  notes: no hardware figure is stated in the manuscript

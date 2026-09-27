@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oaer-repurposing"
+version = "0.1.0"
+description = "Outcome-anchored effect ranking over a typed knowledge graph, for repurposable therapeutics in metastatic colorectal cancer"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {file = "LICENSE"}
+dependencies = [
+  "numpy==2.4.3",
+  "PyYAML==6.0.3",
+  "scikit-learn==1.8.0",
+  "scipy==1.17.1",
+  "torch==2.11.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest==9.0.3", "ruff==0.15.13", "mypy==2.1.0", "black==25.9.0", "isort==6.1.0"]
+
+[project.scripts]
+oaer-pretrain = "oaer.console.pretrain:main"
+oaer-emulate = "oaer.console.emulate:main"
+oaer-rank = "oaer.console.rank:main"
+oaer-ablate = "oaer.console.ablate:main"
+oaer-ledger = "oaer.console.ledger:main"
+oaer-verify = "oaer.console.verify:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+# Import order is owned by isort alone; ruff's isort rules are left off so the two
+# tools cannot disagree about a block.
+select = ["E", "F", "UP", "B", "SIM", "RET", "ARG", "C4"]
+ignore = [
+  "E501",
+  "B905",
+  "RET504",
+  "ARG002",
+  "ARG005",
+  "SIM108",
+  "C408",
+  # The record enums keep the plain ``str`` mixin rather than ``StrEnum``: their
+  # members are written into the plain-text reports and compared against the
+  # payload labels, so ``str(member)`` must stay stable across Python versions.
+  "UP042",
+]
+# A check reads only part of its inputs by design, and a test may request a
+# fixture it does not read or assert a property by raising.
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ARG001", "ARG002", "ARG005", "B018", "B011"]
+
+[tool.black]
+line-length = 100
+target-version = ["py311"]
+
+[tool.isort]
+profile = "black"
+line_length = 100
+src_paths = ["src"]
+known_first_party = ["oaer"]
+combine_as_imports = true
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true
+files = ["src/oaer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+filterwarnings = ["ignore::DeprecationWarning", "ignore::UserWarning"]

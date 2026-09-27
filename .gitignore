@@ -1,0 +1,29 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.part
+build/
+dist/
+# Anchored so the package directory src/oaer/cohort/ is never ignored while the
+# cohort root and the run artefacts stay out of the commit.
+/data/
+/cohorts/
+/runs/
+/models/
+# Every ad-hoc command writes its report here, so the directory is ignored except
+# for the verification summary: the integrity manifest digests that summary, and a
+# published tree missing a file its own manifest lists would not describe itself.
+/reports/*
+!/reports/verification.txt
+.coverage
+htmlcov/
+.DS_Store

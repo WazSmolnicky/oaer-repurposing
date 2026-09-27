@@ -1,0 +1,98 @@
+# The ten fixed seeds.
+#
+# Ref: Table 2 note. The paired test across the seeds measures optimization noise rather than sampling uncertainty and licenses no population claim on its own.
+
+# candidate_count: 24
+name: supplementary_seed_panel
+
+seed: 20260831
+
+site_holdout: C
+
+cohort:
+  site_a_decisions: 3412
+  site_b_decisions: 2938
+  site_c_decisions: 1612
+  site_a_prospective_decisions: 1187
+  site_b_prospective_decisions: 983
+  site_c_prospective_decisions: 544
+  retrospective_patients: 4318
+  prospective_patients: 1586
+  decisions_per_patient: 1.84
+  candidate_count: 24
+  exposed_candidates: 0
+  profile_scale: 1.0
+
+catalogue:
+  non_oncology_indications: 612
+  oncology_only_excluded: 96
+  relations: 7
+  anchor_types: 4
+  motif_orders: [2, 3]
+  negative_samples: 12
+  anchor_corruptions: 5
+
+emulation:
+  trimming_epsilon: 0.05
+  minimum_exposed: 40
+  folds: 5
+  censoring_floor: 0.05
+  new_user_lookback_days: 365
+  regularisation: 1.0
+  horizons_months: [8.0, 6.5, 5.5]
+  placebo_candidates: 3
+
+encoder:
+  embedding_dim: 64
+  hidden_dim: 64
+  layers: 2
+  num_basis: 4
+  dropout: 0.1
+  graph_degree_scale: 8.0
+  degree_transfer_gain: 1.0
+
+head:
+  route_dim: 32
+  modifier_dim: 16
+  pathology_only_dim: 12
+  l2_penalty: 1.0e-4
+  outcome_weight_scale: 1.0
+
+gate:
+  miscoverage_alpha: 0.1
+  margin_delta: 0.0
+  rank_depth_k: 3
+  calibration_window_months: 12
+  transport_clip: 10.0
+
+fitting:
+  stage1_epochs: 4
+  stage2_epochs: 4
+  stage3_epochs: 40
+  batch_size: 256
+  learning_rate: 3.0e-3
+  weight_decay: 1.0e-4
+  warmup_steps: 50
+  total_steps: 3000
+  grad_clip: 1.0
+  precision: fp32
+  device: cpu
+  early_stop_patience: 8
+
+readings:
+  seeds: [11, 23, 37, 41, 59, 67, 73, 89, 97, 103]
+  bootstrap_resamples: 400
+  bootstrap_confidence: 0.95
+  hits_at: 20
+  ndcg_at: 20
+  jaccard_top: 5
+  landmark_months: 12.0
+
+compute:
+  accelerator: not reported by the manuscript
+  peak_memory_gb: null
+  wall_clock_per_decision_minutes: 11.0
+  wall_clock_interquartile_low: 7.0
+  wall_clock_interquartile_high: 18.0
+  frozen_throughput_percent: 96.4
+  notes: no hardware figure is stated in the manuscript

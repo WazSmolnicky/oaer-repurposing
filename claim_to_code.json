@@ -1,0 +1,911 @@
+{
+  "release": "Outcome-anchored effect ranking (OAER) for repurposable therapeutics in metastatic colorectal cancer",
+  "manuscript": {
+    "title": "A graph foundation model linking molecular, pathology and real-world clinical data for repurposable therapeutics in metastatic colorectal cancer",
+    "venue": "npj Digital Medicine (submission manuscript, line-numbered template, structured abstract)",
+    "pages_read": 33,
+    "claims_mapped": 60
+  },
+  "scope": {
+    "private": "The pooled arm of Sites A-C is a private, irreversibly de-identified multi-centre cohort. It is not redistributed here. What ships is the record schema, a schema-compatible builder that holds the reported one-variable marginals exactly, and the estimator that reads it.",
+    "consequence": "Every cohort-level column of Tables 1-5 is NOT_RUN against the article's own arm. The mechanisms, the estimator algebra, the closed forms of the builder and the article's internal table arithmetic are executed and checked.",
+    "auxiliary": "The public auxiliary resources (ChEMBL, Open Targets, DrugCentral, TCGA-COADREAD, CPTAC-COAD, MSK-IMPACT, MSK-CHORD, SurGen, GSE39582, TCGA-CRC-DX) are read at their source and are not redistributed. PAIP2020 is never used (Sec. 2.2)."
+  },
+  "claims": [
+    {
+      "claim_id": "sec-2.1-decision-unit",
+      "paper_location": "Sec. 2.1, Sec. 2.3",
+      "statement": "The analytical unit is the patient-line decision; time zero is the start of the line; the state is the quadruple (M_i, P_i, C_i, L_i) of molecular alterations, fixed slide embedding, health timeline and line.",
+      "verification": "src/oaer/support/types.py defines DecisionState with exactly those four blocks and Decision with decision_id, patient_id, site, line, exposure, follow_up and event; tests/test_cohort.py asserts the partition and the positive follow-up of every record it builds.",
+      "code_paths": [
+        "src/oaer/support/types.py",
+        "src/oaer/cohort/schema.py",
+        "src/oaer/cohort/builder.py",
+        "tests/test_cohort.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.1-line-strata",
+      "paper_location": "Sec. 2.1, Table 4 (line of therapy)",
+      "statement": "Lines are first, second and third-or-later, and the molecular partition is exhaustive and mutually exclusive: RAS-mutant MSS, RAS/BRAF wild-type MSS, BRAF V600E, MSI-high, and an other block that also carries the not-fully-typed records.",
+      "verification": "src/oaer/support/types.py declares MolecularStratum and LineOfTherapy; src/oaer/cohort/builder.py assigns each record exactly one stratum; the battery's check_stratum_partition recounts the partition on an arm it builds and confirms it is exhaustive, mutually exclusive and additive.",
+      "code_paths": [
+        "src/oaer/support/types.py",
+        "src/oaer/cohort/builder.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.1-marginal-fidelity",
+      "paper_location": "Table 1 panel a, Table 4",
+      "statement": "The reported one-variable marginals are stated over the arm: site, stratum, line, sidedness, metastatic pattern, presentation timing, ECOG, sex, age band and modality availability.",
+      "verification": "src/oaer/cohort/builder.py carries RETROSPECTIVE_MARGINALS and PROSPECTIVE_MARGINALS transcribed cell for cell from Table 1a and Table 4; the battery's check_cohort_marginals regenerates a cohort and recounts every cell independently of the builder's own counters.",
+      "code_paths": [
+        "src/oaer/cohort/builder.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.2-candidate-admission",
+      "paper_location": "Sec. 2.2",
+      "statement": "The candidate list admits every agent approved for at least one non-oncology application in ChEMBL, Open Targets and DrugCentral, and excludes agents approved for oncology only.",
+      "verification": "src/oaer/catalogue/concepts.py implements the admission test against ONCOLOGY_TERMS; the battery's check_catalogue_admission builds a 64-entry directory and confirms no admitted agent has an oncology-only label and that no oncology-only entry survives.",
+      "code_paths": [
+        "src/oaer/catalogue/concepts.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.2-kg-construction",
+      "paper_location": "Sec. 2.2, Sec. 2.4",
+      "statement": "The knowledge graph is typed; the release carries seven relations and four patient anchor types, and no edge is duplicated.",
+      "verification": "src/oaer/catalogue/graph.py declares AnchorType and RELATION_INDEX (seven relations) and builds the graph; the battery's check_graph_census brute-force recounts the edge list and confirms zero duplicate edges and no relation outside the declared index.",
+      "code_paths": [
+        "src/oaer/catalogue/graph.py",
+        "catalogue/catalogue.yaml",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.2-paip-exclusion",
+      "paper_location": "Sec. 2.2, Table 5 caption",
+      "statement": "PAIP2020 is deliberately absent because its download sits behind a click-through research-use gate, so it is never used as an evidence source.",
+      "verification": "catalogue/sources.yaml records PAIP2020 under an 'excluded' key with that reason; src/oaer/ledger/generalization.py carries the same exclusion as data; no probe and no URL references it.",
+      "code_paths": [
+        "catalogue/sources.yaml",
+        "src/oaer/ledger/generalization.py",
+        "dataset_urls.txt"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.3-grace-period",
+      "paper_location": "Sec. 2.3, Table 1 caption",
+      "statement": "Exposure A_{i,d} in {0,1} is a new use of d inside the product-specific grace period, and the grace period is 90, 60 and 30 days for first, second and third-or-later lines.",
+      "verification": "src/oaer/support/types.py exposes the per-line grace window; catalogue/catalogue.yaml records rows_per_line first/second/third_plus as 90/60/30; tests/test_cohort.py asserts the window per line.",
+      "code_paths": [
+        "src/oaer/support/types.py",
+        "catalogue/catalogue.yaml",
+        "tests/test_cohort.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.3-restricted-time",
+      "paper_location": "Sec. 2.3",
+      "statement": "The outcome is time to radiologic progression (RECIST 1.1) or death, restricted at the line's horizon t*_L; the observed form is the minimum of the restricted time and the censoring time.",
+      "verification": "src/oaer/estimands/horizons.py defines line_horizon and the integration grid; src/oaer/estimands/cloning.py forms the observed restricted time; the battery's check_rmst_closed_form compares the censoring-free restricted mean against the hand mean of the capped time.",
+      "code_paths": [
+        "src/oaer/estimands/horizons.py",
+        "src/oaer/estimands/cloning.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.3-conditional-effect",
+      "paper_location": "Sec. 2.3",
+      "statement": "The estimand is a patient-level conditional effect: the difference in restricted mean progression-free survival time, not a disease-level score.",
+      "verification": "src/oaer/estimands/pseudo_outcome.py forms the per-decision, per-candidate effect; src/oaer/policy/survival.py contrasts restricted means; the battery's check_pseudo_outcome_identity recovers the arm-mean difference exactly under oracle nuisances.",
+      "code_paths": [
+        "src/oaer/estimands/pseudo_outcome.py",
+        "src/oaer/policy/survival.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.3-positivity",
+      "paper_location": "Sec. 2.3 (A2, A2''), Corollary 4",
+      "statement": "Positivity is required on the prescribing set W~_d only, not on the multimodal embedding; the set-level initiation probability p_R(s) is a pattern for starting something in R and is not built from the candidates' own propensities.",
+      "verification": "src/oaer/estimands/nuisance.py fits the propensity on the low-dimensional prescribing set (prescribing_matrix) and never on the embedding; src/oaer/estimands/trimming.py and src/oaer/gate/identification.py hold the positivity test to the prescribing set; the module docstring records the design choice.",
+      "code_paths": [
+        "src/oaer/estimands/nuisance.py",
+        "src/oaer/estimands/trimming.py",
+        "src/oaer/gate/identification.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "eq-2-doubly-robust",
+      "paper_location": "Eq. (2), Sec. 2.5",
+      "statement": "The pseudo-outcome is doubly robust: an outcome-regression difference plus an inverse-propensity-weighted, censoring-weighted residual term, and no nuisance enters at first order.",
+      "verification": "src/oaer/estimands/pseudo_outcome.py implements Eq. (2) term by term, with the first bracket evaluated in integral form; the battery's check_pseudo_outcome_identity evaluates it twice, once through Eq. (2) and once from the arm means directly, and requires agreement to 1e-9.",
+      "code_paths": [
+        "src/oaer/estimands/pseudo_outcome.py",
+        "src/oaer/estimands/nuisance.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "eq-2-martingale",
+      "paper_location": "Eq. (2) (the integral term), Algorithm 2 line 12",
+      "statement": "The censoring martingale dM^C_i(u) and the conditional restricted-mean Q_{a,d}(u, s) complete Eq. (2).",
+      "verification": "src/oaer/estimands/nuisance.py exposes martingale_increment and conditional_mean; the battery's check_martingale_mean confirms the mean increment is zero within four standard errors over 400 records it builds, which is the defining property of the martingale.",
+      "code_paths": [
+        "src/oaer/estimands/nuisance.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "alg-2-new-user-lookback",
+      "paper_location": "Algorithm 2 line 1",
+      "statement": "Emulation restricts to new users of the candidate and of its active comparator: no dispensing of either in the 365 days before time zero.",
+      "verification": "src/oaer/estimands/cloning.py and src/oaer/estimands/nuisance.py carry the new-user lookback as a parameter (protocols/main.yaml: emulation.new_user_lookback_days = 365); tests/test_estimands.py asserts the restriction.",
+      "code_paths": [
+        "src/oaer/estimands/cloning.py",
+        "src/oaer/estimands/nuisance.py",
+        "protocols/main.yaml",
+        "tests/test_estimands.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "alg-2-clone-censor",
+      "paper_location": "Algorithm 2 line 2, Table 1 caption",
+      "statement": "Every eligible decision is cloned at time zero into an initiate and a do-not-initiate strategy, and a clone is censored when its observed exposure deviates from its assigned strategy inside the grace window; clones are weighted by the inverse probability of remaining uncensored.",
+      "verification": "src/oaer/estimands/cloning.py builds the clones, censors at deviation and weights by the censoring survival; src/oaer/policy/contrast.py implements the weighted policy contrast of Lemma 2; tests/test_estimands.py covers the clone construction and the weight.",
+      "code_paths": [
+        "src/oaer/estimands/cloning.py",
+        "src/oaer/policy/contrast.py",
+        "tests/test_estimands.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "alg-2-cross-fitting",
+      "paper_location": "Algorithm 2 lines 3-15, Sec. 2.5, Sec. 2.6",
+      "statement": "Five patient-level folds, stratified by site within Sites A and B, fit the nuisances outside each fold and form that fold's pseudo-outcomes from them; Site C forms no training pseudo-outcome and is scored from the frozen nuisances.",
+      "verification": "src/oaer/cohort/splits.py builds the site-stratified folds and the outer site split; src/oaer/estimands/pseudo_outcome.py cross-fits the table; src/oaer/study.py scores the held-out site from the frozen fit; tests/test_estimands.py asserts that no held-out record contributes a training pseudo-outcome.",
+      "code_paths": [
+        "src/oaer/cohort/splits.py",
+        "src/oaer/estimands/pseudo_outcome.py",
+        "src/oaer/study.py",
+        "tests/test_estimands.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "alg-2-trimming",
+      "paper_location": "Sec. 2.3 (D_eps), Sec. 2.5, Algorithm 2 line 8",
+      "statement": "A candidate is trimmed out of D_eps(s) when its fitted propensity leaves [epsilon, 1 - epsilon] or its exposed count falls below n_min; the trimmed fraction is recorded per stratum.",
+      "verification": "src/oaer/estimands/trimming.py implements eligible_set with an explicit IneligibleReason per blocked candidate; the battery's check_trimming_rule recomputes the partition by brute force on a hand-built list of five triples and requires an exact match.",
+      "code_paths": [
+        "src/oaer/estimands/trimming.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "alg-2-censoring-floor",
+      "paper_location": "Algorithm 2 line 11",
+      "statement": "The censoring survival enters the weights floored away from zero.",
+      "verification": "src/oaer/estimands/nuisance.py floors the fitted Kaplan-Meier curve; src/oaer/estimands/pseudo_outcome.py takes the maximum of the fitted survival and the floor before inverting; protocols/main.yaml: emulation.censoring_floor records the declared value.",
+      "code_paths": [
+        "src/oaer/estimands/nuisance.py",
+        "src/oaer/estimands/pseudo_outcome.py",
+        "protocols/main.yaml"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "eq-3-stage1",
+      "paper_location": "Eq. (3), Sec. 2.6, Algorithm 1 line 1",
+      "statement": "Stage 1 is masked-edge pretraining: the log-softmax over the true tail and its negative tails, on the graph alone, with node features retained and no patient data.",
+      "verification": "src/oaer/encoder/relational.py implements masked_edge_loss as the softmax-over-negatives objective; src/oaer/fitting/stages.py runs Stage 1 with no outcome in scope; the battery's check_forward_backward_update executes the forward, the Eq. (3) loss, the backward pass and an optimiser step, and reports the parameter delta.",
+      "code_paths": [
+        "src/oaer/encoder/relational.py",
+        "src/oaer/fitting/stages.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "eq-4-stage2",
+      "paper_location": "Eq. (4), Sec. 2.6, Algorithm 1",
+      "statement": "Stage 2 hides an incomplete collection of a patient node's typed anchors and reconstructs them against non-anchors of the same type, by the sum of log-sigmoid scores.",
+      "verification": "src/oaer/encoder/anchoring.py implements anchor_reconstruction_loss as the two log-sigmoid sums; src/oaer/catalogue/sampling.py draws the corruptions without an anchor colliding with its own non-anchors; the battery's check_anchor_corruption asserts zero collisions and check_stage2_forward asserts the Stage 2 loss falls.",
+      "code_paths": [
+        "src/oaer/encoder/anchoring.py",
+        "src/oaer/catalogue/sampling.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "eq-5-stage3",
+      "paper_location": "Eq. (5), Sec. 2.6, Algorithm 1 line 9",
+      "statement": "Stage 3 fits the shared ranking head tau_phi(h_theta(s, d)) by weighted least squares on the out-of-fold pseudo-outcomes, with an explicit L2 penalty over both parameter sets; the candidate enters only through the representation, so one head is efficient for every rank depth.",
+      "verification": "src/oaer/head/objectives.py implements Eq. (5) with the candidate-balancing weights; src/oaer/head/ranking.py holds one head shared across candidates; the battery's check_single_batch_overfit drives the Eq. (5) loss down on one batch over 60 updates, and check_minimal_training_loop requires a falling trailing loss.",
+      "code_paths": [
+        "src/oaer/head/objectives.py",
+        "src/oaer/head/ranking.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.4-relational-encoder",
+      "paper_location": "Sec. 2.4 (relational encoder)",
+      "statement": "The relational encoder is a higher-order motif relational encoder from the inductive knowledge-graph foundation-model family; it retains node features, because that family carries none of its own, and it must place a patient node from a site the encoder never trained on.",
+      "verification": "src/oaer/encoder/relational.py builds the encoder on a motif basis with a relation-specific mixing weight and an input projection of node features; src/oaer/catalogue/motifs.py provides the motif Laplacians; the battery's check_motif_operator compares the motif operator against an enumerated walk over the same edge list and requires an exact match.",
+      "code_paths": [
+        "src/oaer/encoder/relational.py",
+        "src/oaer/encoder/propagation.py",
+        "src/oaer/catalogue/motifs.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.4-head-split",
+      "paper_location": "Sec. 2.4 (ranking head and outcome anchoring)",
+      "statement": "The head splits into a route score g_phi over the candidate's mechanism and a pathology benefit modifier b_phi read off the fixed slide embedding, and the modifier is centred on D_eps(s) so it satisfies the zero-mean condition.",
+      "verification": "src/oaer/head/modifiers.py implements RouteScore, PathologyModifier and zero_mean_centre on the eligible set; src/oaer/head/ranking.py composes tau_phi = g_phi + centred b_phi; tests/test_encoder.py asserts the centring and that an ineligible candidate is left untouched.",
+      "code_paths": [
+        "src/oaer/head/modifiers.py",
+        "src/oaer/head/ranking.py",
+        "src/oaer/cohort/pathology.py",
+        "tests/test_encoder.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.4-outputs",
+      "paper_location": "Sec. 2.4 (outputs)",
+      "statement": "For each decision the frozen model emits four things: a ranking by tau_d(s), a harm block of candidates failing the criteria, a not-outcome-identified block with a per-candidate reason, and an act-or-defer flag.",
+      "verification": "src/oaer/gate/harm.py returns exactly those four members in GateDecision and GateOutcome; src/oaer/gate/identification.py builds the not-identified block with its reasons; the battery's check_gate_ordering re-derives the sign-conditioned ordering by hand and asserts the blocked candidate carries its reason.",
+      "code_paths": [
+        "src/oaer/gate/harm.py",
+        "src/oaer/gate/identification.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "eq-1-act-or-defer",
+      "paper_location": "Eq. (1), Sec. 2.4, Algorithm 3 lines 14-16",
+      "statement": "Deferral is the rule D_eps(s) = empty or max_{d in D_eps(s)} tau^alpha(s, d) <= delta, where tau^alpha is the lower limit of the weighted split-conformal interval at miscoverage alpha and delta is the pre-specified margin.",
+      "verification": "src/oaer/gate/conformal.py implements the weighted split-conformal quantile and src/oaer/gate/harm.py applies Eq. (1) verbatim; the battery's check_conformal_coverage measures the interval's coverage on a fresh sample against the nominal level, and check_weighted_quantile inverts a weighted cumulative mass by hand.",
+      "code_paths": [
+        "src/oaer/gate/conformal.py",
+        "src/oaer/gate/harm.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "alg-3-sign-condition",
+      "paper_location": "Algorithm 3 lines 12-13, Sec. 2.7",
+      "statement": "The ordering carries the sign condition tau_d(s) > 0, so the top-k set of the ranking and the agreement rule of Section 2.7 coincide.",
+      "verification": "src/oaer/gate/harm.py applies the sign condition inside the ordering rather than after it; src/oaer/head/ranking.py exposes positive_ranking; the battery's check_gate_ordering asserts the negative-scoring candidate is excluded from the hand-sorted ranking.",
+      "code_paths": [
+        "src/oaer/gate/harm.py",
+        "src/oaer/head/ranking.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "thm-1a-supervision-invariance",
+      "paper_location": "Theorem 1(a)",
+      "statement": "Under a patient-invariant label the loss's minimiser is patient-invariant: the score cannot evolve with S, so the value gap equals the personalisation term Delta_pers(k), which vanishes exactly when the top-k set is constant across D_eps(s).",
+      "verification": "src/oaer/study.py's ablation path builds the curated-label target, which is what the C1 removal means; src/oaer/console/ablate.py re-fits the same head on that target and prints the measured removal beside the article's; the Top-5 Jaccard column is the second read-out that can refute Theorem 1(a) and is computed in src/oaer/readings/ranking.py.",
+      "code_paths": [
+        "src/oaer/console/ablate.py",
+        "src/oaer/head/objectives.py",
+        "src/oaer/readings/ranking.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "thm-1bc-identification-optimality",
+      "paper_location": "Theorem 1(b)-(c)",
+      "statement": "tau_d(s) = E[Gamma_d | S = s] for the censored doubly robust Gamma_d; the top-k policy value V_k(pi) is identified if either the two outcome regressions or the exposure-and-censoring pair is accurate; and the second-stage selection is efficient for every k at once, with nuisance error entering at second order under cross-fitting.",
+      "verification": "src/oaer/estimands/pseudo_outcome.py forms Gamma_d and evaluates V_k; src/oaer/policy/value.py implements the top-k value of Theorem 1(b); the module docstring records the efficiency argument; the battery's check_pseudo_outcome_identity is the exact-identification case.",
+      "code_paths": [
+        "src/oaer/estimands/pseudo_outcome.py",
+        "src/oaer/policy/value.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "lemma-2-weighted-agreement",
+      "paper_location": "Lemma 2, Sec. 2.7",
+      "statement": "V_obs(pi) = E[1{A intersect R(S) != empty} Delta* Y~ / {p_R(S) G(Y~- | A, S)}]; an unweighted agreement-versus-non-agreement comparison equals the policy-value contrast only when p_R(S) is constant, which this prescription violates, and even then the hazard ratio is not the policy-value contrast; the no-initiation weight is not the complement of p_R.",
+      "verification": "src/oaer/policy/contrast.py implements the weighted agreement identity and the contrast; src/oaer/estimands/cloning.py keeps the no-initiation weight separate rather than complementing p_R; src/oaer/estimands/sensitivity.py computes the E-value on the risk-ratio scale, as the lemma's identity requires.",
+      "code_paths": [
+        "src/oaer/policy/contrast.py",
+        "src/oaer/estimands/cloning.py",
+        "src/oaer/estimands/sensitivity.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "prop-3-orbit-regret",
+      "paper_location": "Proposition 3",
+      "statement": "A relational encoder that reads only structure and retained node properties is invariant to the graph's feature-preserving automorphisms, so every ranking it induces carries regret at least Lambda, the orbit-partition quantity; the regret splits into a curation term and an estimation term.",
+      "verification": "src/oaer/catalogue/motifs.py exposes orbit_partition and the motif signature the invariance is stated over; src/oaer/encoder/relational.py's read-out is a bilinear match of node states, so a relabelling inside an orbit leaves the score unchanged; the derivation is asserted in tests/test_catalogue.py.",
+      "code_paths": [
+        "src/oaer/catalogue/motifs.py",
+        "src/oaer/encoder/relational.py",
+        "tests/test_catalogue.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "prop-5-borrowing-strength",
+      "paper_location": "Proposition 5",
+      "statement": "Pooling pseudo-outcomes across a radius-r neighbourhood of the graph has effective count N_eff_r(d) = N_r(d)/{1 + (m_bar - 1) rho_w}, and the gain is largest for low exposed counts, diminishing and eventually negative as the local error term grows; the deployed estimator does not use this pooling.",
+      "verification": "src/oaer/encoder/relational.py scales a node's initial state by its log degree, which is the borrowing-strength behaviour, and its docstring states the provenance; src/oaer/readings/interference.py implements the exposure-tercile read-out of Table 3 panel b; the deployed second stage regresses on the unpooled estimator, as the manuscript states.",
+      "code_paths": [
+        "src/oaer/encoder/relational.py",
+        "src/oaer/readings/interference.py",
+        "src/oaer/ledger/ablations.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "alg-1-pretraining-order",
+      "paper_location": "Algorithm 1 lines 1-10",
+      "statement": "Stage 1 is fitted on the graph with no patient data; from Stage 3 the outcomes enter, the cross-fitted nuisances and pseudo-outcomes are formed, the head is fitted with early stopping on an inner fold's V3, and the gate is calibrated on the most recent retrospective window of Sites A and B only before delta is frozen.",
+      "verification": "src/oaer/fitting/stages.py runs Stage 1 and Stage 2 with no outcome in scope; src/oaer/study.py runs the emulation, fits the head and calibrates the gate in that order; src/oaer/gate/conformal.py's calibration set is built only from development records, which the battery's check_study_end_to_end exercises end to end on the smoke protocol.",
+      "code_paths": [
+        "src/oaer/fitting/stages.py",
+        "src/oaer/study.py",
+        "src/oaer/gate/conformal.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-1a-cohort",
+      "paper_location": "Table 1 panel a",
+      "statement": "Retrospective arm: Site A 1,847/3,412, Site B 1,592/2,938, Site C 879/1,612 patients/decisions; prospective arm 692/1,187, 574/983, 320/544; pooled 4,318/7,962 retrospective and 1,586/2,714 prospective.",
+      "verification": "src/oaer/ledger/outcomes.py carries the panel as data; the battery's check_ledger_additivity sums the site rows and requires the pooled row (7,962 decisions, 4,318 patients, 2,714 prospective decisions) to be their exact total. No cohort-level value is re-measured, because the arm is private.",
+      "code_paths": [
+        "src/oaer/ledger/outcomes.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "tab-1b-primary",
+      "paper_location": "Table 1 panel b, Abstract",
+      "statement": "Pooled prospective silent-mode arm: 1,943 cloned decisions; RMST PFS 6.4 months; PFS hazard ratio 0.68 (95% CI 0.55-0.84); RMST OS 11.3 months; OS hazard ratio 0.79 (0.63-0.99); C-index 0.746 against a reproduced reference of 0.658; weighted policy value at k = 1 5.9 (5.2-6.6); weighted policy contrast at k = 3 2.4 (0.9-3.9).",
+      "verification": "src/oaer/ledger/outcomes.py transcribes every cell; the battery's check_ledger_additivity asserts the 1,943 cloned decisions. The values themselves are NOT_RUN: they are read off a private arm this release does not hold. The estimator that would produce them is executed on the arm this release builds.",
+      "code_paths": [
+        "src/oaer/ledger/outcomes.py",
+        "src/oaer/policy/survival.py",
+        "src/oaer/policy/contrast.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "tab-1c-per-candidate",
+      "paper_location": "Table 1 panel c",
+      "statement": "Per-candidate emulations: metformin against a DPP-4 inhibitor 1,286 exposed, PFS HR 0.71 (0.62-0.81); beta-blocker against a calcium-channel blocker 962, 0.76 (0.65-0.89); low-dose aspirin against clopidogrel 534, 0.68 (0.55-0.84); proton-pump inhibitor against an H2 antagonist 1,704, 1.18 (1.06-1.31); pooled identified set 11,275, 0.74 (0.69-0.79), E-value 1.87.",
+      "verification": "src/oaer/ledger/outcomes.py carries the panel; src/oaer/catalogue/concepts.py names the four agents with their drug classes and active comparators as the panel states them; the battery's check_pipeline_effect_signs and check_pipeline_effect_recovery read the fitted emulation against the builder's closed-form truth for those four agents. The exposed counts and intervals on the article's own arm are NOT_RUN.",
+      "code_paths": [
+        "src/oaer/ledger/outcomes.py",
+        "src/oaer/catalogue/concepts.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "tab-1d-criteria",
+      "paper_location": "Table 1 panel d, Sec. 1",
+      "statement": "Pre-specified criteria: primary PFS hazard ratio <= 0.75 with upper 95% CI < 1, observed 0.68, met with 0.07 of margin; weighted RMST policy contrast >= 1.5 months with lower 95% CI > 0, observed 2.4, met with 0.9 of margin; supporting prospective OS C-index against the best score, lower 95% CI >= +0.05, observed +0.088 (0.051-0.125), met with 0.001 of margin; the sensitivity counterpart against the best prospectively observed score, observed +0.075 (0.038-0.112), not met, 0.012 below the margin.",
+      "verification": "src/oaer/ledger/criteria.py holds each criterion, its threshold, its observed value, its verdict and its margin, and exposes discrimination_margin_is_reachable and value_gap_reachability; the battery's check_criteria_arithmetic recomputes both primary margins from the reported values and confirms the supporting row is met while the sensitivity row is not.",
+      "code_paths": [
+        "src/oaer/ledger/criteria.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-1d-no-multiplicity",
+      "paper_location": "Table 1 panel d note, Sec. 2.7",
+      "statement": "The two primary rows carry no multiplicity adjustment because the criterion is their intersection and both must be met; the supporting and secondary rows carry the false-discovery-rate correction.",
+      "verification": "src/oaer/ledger/criteria.py marks the primary pair as an intersection without a correction and the supporting and secondary rows as corrected; src/oaer/readings/resampling.py implements the correction used by the secondary comparisons.",
+      "code_paths": [
+        "src/oaer/ledger/criteria.py",
+        "src/oaer/readings/resampling.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-1e-pathways",
+      "paper_location": "Table 1 panel e",
+      "statement": "Recommendation-to-action pathway, pooled: top-ranked identified candidate started 438 (22.5%), PFS HR 0.62; another top-3 candidate 296 (15.2%), 0.71; identified candidate outside the top 3 341 (17.5%), 0.91; no candidate, backbone only 512 (26.4%), reference; de-prioritized agent co-prescribed 168 (8.6%), 1.13; nothing started 188 (9.7%), 1.07.",
+      "verification": "src/oaer/ledger/outcomes.py carries the panel; src/oaer/gate/harm.py produces the pathway strata the panel names, including the harm block that separates the de-prioritized row; the panel's values on the article's arm are NOT_RUN.",
+      "code_paths": [
+        "src/oaer/ledger/outcomes.py",
+        "src/oaer/gate/harm.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "tab-1f-retrospective",
+      "paper_location": "Table 1 panel f, Sec. 1.2",
+      "statement": "Retrospective arm under the same k and the same deferral rule: Site A 2,214 cloned, PFS HR 0.76 (0.69-0.84); Site B 1,806, 0.79 (0.71-0.88); Site C scored by the frozen A+B model 982, 0.83 (0.73-0.94); pooled 5,002, 0.78 (0.72-0.85).",
+      "verification": "src/oaer/ledger/outcomes.py transcribes the panel; src/oaer/cohort/splits.py implements the outer site hold-out that makes Site C scored-by-frozen-model rather than cross-fitted; the values are NOT_RUN against the article's arm.",
+      "code_paths": [
+        "src/oaer/ledger/outcomes.py",
+        "src/oaer/cohort/splits.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "tab-1-diagnostics",
+      "paper_location": "Table 1 panels b and f notes",
+      "statement": "Diagnostics reported on the primary arm: the per-line follow-up ended before the grace window closed at 6.8%; the clone-censoring weight median 1.04 with a 99th centile of 2.61; the per-line effective sample size 412; the pooled E-value 2.31 (1.42 upper) for PFS and 1.83 (1.19) for OS; the negative-control outcomes 1.02 (0.94-1.11) and 0.98 (0.89-1.08); the between-site I2 0% for both endpoints and for the discrimination read-out.",
+      "verification": "src/oaer/ledger/outcomes.py carries the diagnostics; src/oaer/estimands/sensitivity.py computes the E-value and the negative-control risk ratio; src/oaer/policy/survival.py exposes site_heterogeneity; the battery's check_e_value_closed_form checks the E-value against its closed form and check_site_heterogeneity reproduces the Cochran Q and I2 by brute force over the three site estimates.",
+      "code_paths": [
+        "src/oaer/ledger/outcomes.py",
+        "src/oaer/estimands/sensitivity.py",
+        "src/oaer/policy/survival.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-2a-rankers",
+      "paper_location": "Table 2 panel A, Sec. 1.3",
+      "statement": "Ranking comparison across five families and controls: the best transfer row reaches Hits@20 24.9 / nDCG@20 0.361; the best causal estimator 31.8 / 0.437; the controls 8.6 / 0.147; a same-target head on a peer graph 39.4 / 0.581; OAER 41.7 / 0.612 / 7.4 months.",
+      "verification": "src/oaer/ledger/comparator_roster.py stores the roster with each row's provenance key; src/oaer/readings/ranking.py computes Hits@k and nDCG@k; the battery's check_hits_reference recomputes both against hand values on a five-item example. The roster's values are the article's and are NOT re-measured.",
+      "code_paths": [
+        "src/oaer/ledger/comparator_roster.py",
+        "src/oaer/readings/ranking.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "tab-2b-prognostic",
+      "paper_location": "Table 2 panel B",
+      "statement": "Prognostic comparison on the same records: the multimodal models span OS C-index 0.648-0.688 and 12-month AUROC 0.702-0.751; the record encoders 0.662-0.694; the reproduced reference scores with their vintage 0.618-0.658; OAER 0.746 (0.718-0.774) with ECE 0.028 and AUROC 0.812.",
+      "verification": "src/oaer/ledger/comparator_roster.py stores the panel; src/oaer/readings/discrimination.py computes the concordance index, the expected calibration error and the twelve-month time-dependent AUROC; the battery's check_concordance_reference, check_auroc_reference and check_ece_reference each recompute the metric by brute force against a hand value.",
+      "code_paths": [
+        "src/oaer/ledger/comparator_roster.py",
+        "src/oaer/readings/discrimination.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-3a-removals",
+      "paper_location": "Table 3 panel a, Sec. 1.4",
+      "statement": "Component removals on the ranking metrics: the highest-ranked control removes 32.9 Hits@20; the curated-label C1 removal 8.4; the whole of C2 7.8; the no-patient-anchor C2c removal 8.1; the no-identification-gate C3 removal 3.4; the no-pathology-route C4 removal 3.0; the joint C1+C2 removal 17.7; the backbone-only floor 22.6.",
+      "verification": "src/oaer/ledger/ablations.py stores the panel as data and defines the canonical removal of each component; src/oaer/console/ablate.py re-fits the same head with each construct removed and prints the measured removal beside the article's; tests/test_ledger.py asserts the ledger's internal structure and the traceability of every panel-d interaction.",
+      "code_paths": [
+        "src/oaer/ledger/ablations.py",
+        "src/oaer/console/ablate.py",
+        "tests/test_ledger.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "tab-3d-interaction",
+      "paper_location": "Table 3 panel d, Sec. 1.4, Sec. 2.7",
+      "statement": "Each panel-d interaction is computed from three panel-a rows: the two canonical single removals and the joint removal of the same pair. IAB = Delta_AB - (Delta_A + Delta_B), with a negative value synergy; IR = (Delta_A + Delta_B)/Delta_AB, with IR < 1 synergy; IR is printed only where the interval of its denominator lies entirely above zero.",
+      "verification": "src/oaer/ledger/ablations.py exposes interaction_from_rows, canonical_row and joint_row so each interaction is arithmetically traceable to reported rows; src/oaer/readings/interference.py implements IAB and IR with the sign convention; the battery's check_iab_ir_traceable recomputes all five pairs from the article's own rows and requires agreement with the reported IAB to 0.005 and the reported IR to 0.01.",
+      "code_paths": [
+        "src/oaer/ledger/ablations.py",
+        "src/oaer/readings/interference.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-3c-modalities",
+      "paper_location": "Table 3 panel c",
+      "statement": "Single-modality contributions: molecular only removes 9.6 Hits@20, pathology only 3.1, clinical only 11.4; the pairs remove 18.9, 22.6 and 16.5, so the full three-modality model is the reference.",
+      "verification": "src/oaer/ledger/ablations.py stores the panel; src/oaer/console/ablate.py withholds a modality block from the head's input and re-fits, which is what the panel's rows mean; src/oaer/estimands/nuisance.py's state_features defines the three blocks the ablation masks.",
+      "code_paths": [
+        "src/oaer/ledger/ablations.py",
+        "src/oaer/console/ablate.py",
+        "src/oaer/estimands/nuisance.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "tab-3-cindex-invariance",
+      "paper_location": "Table 3 caption",
+      "statement": "The concordance column of Table 3 is expected to be invariant by construction, because the C-index is read off the shared cross-fitted outcome regression, which takes the time-zero state and the backbone regimen and never the ranking representation.",
+      "verification": "src/oaer/study.py's reference_concordance reads the concordance off the ridge outcome regression fitted on the state and the backbone, never on the head's representation; src/oaer/console/ablate.py therefore does not re-fit it per configuration; src/oaer/head/modifiers.py's docstring records the consequence.",
+      "code_paths": [
+        "src/oaer/study.py",
+        "src/oaer/console/ablate.py",
+        "src/oaer/head/modifiers.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-4-subgroups",
+      "paper_location": "Table 4, Sec. 1.5",
+      "statement": "Subgroup read-outs over the molecular partition (RAS-mutant MSS 3,512/1,196, RAS/BRAF wild-type MSS 1,902/654, BRAF V600E 862/298, MSI-high 486/168 with a deferral rate of 81.6%, other 1,200/398) and over sidedness, line, metastatic pattern, presentation, modality availability and the equity strata, with the MSI-high stratum the one the interaction test separates.",
+      "verification": "src/oaer/ledger/outcomes.py carries the table; src/oaer/cohort/builder.py reproduces the molecular partition exactly on the arm it builds; the battery's check_ledger_additivity asserts the molecular partition sums to the whole-cohort row; src/oaer/readings/resampling.py implements the interaction test.",
+      "code_paths": [
+        "src/oaer/ledger/outcomes.py",
+        "src/oaer/cohort/builder.py",
+        "src/oaer/readings/resampling.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-5-generalization",
+      "paper_location": "Table 5 panels a-e, Sec. 1.6",
+      "statement": "Generalisation of the frozen model: Site C is -0.019 against the matched internal reference and the between-site I2 is 0%; acquisition strata span -0.003 to -0.013 with the worst-case input perturbation at -0.041; the temporal separation is -0.016; the slide-source strata span -0.006 to -0.016; the public cohorts TCGA-COADREAD -0.021, MSK-IMPACT -0.027, MSK-CHORD -0.024, SurGen -0.031 and -0.034, GSE39582 -0.038. The microsatellite probe reaches AUROC 0.843.",
+      "verification": "src/oaer/ledger/generalization.py stores the strata with the panel, the domain label and the modalities each row carries; the public cohorts with a modality subset are compared against a matched reference, which is what modality_subset and adjacent_domain_rows encode; the battery's check_report_is_complete and check_ledger_additivity cover the ledger's shape.",
+      "code_paths": [
+        "src/oaer/ledger/generalization.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "sec-1.6-microsatellite-probe",
+      "paper_location": "Sec. 1.6, Table 5",
+      "statement": "The microsatellite probe on TCGA-CRC-DX is a classification sanity check with a label AUROC of 0.843 and carries no survival or ranking read-out.",
+      "verification": "src/oaer/ledger/generalization.py carries MICROSATELLITE_PROBE_AUROC and marks the row as a sanity probe; no survival metric is defined for it; src/oaer/readings/discrimination.py provides the AUROC the label is read with.",
+      "code_paths": [
+        "src/oaer/ledger/generalization.py",
+        "src/oaer/readings/discrimination.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "sec-1.5-abstention",
+      "paper_location": "Sec. 1.5, Sec. 1.6, Sec. 2",
+      "statement": "The model defers on 28.4% of decisions; the restricted mean progression-free survival is 5.4 months among deferred decisions and 6.1 months among acted-on ones.",
+      "verification": "src/oaer/gate/harm.py computes the deferral rate from Eq. (1) and src/oaer/gate/harm.py's reason_counts breaks it down; the battery's check_study_end_to_end reports the deferral rate on the smoke arm. The 28.4% figure is the article's and is NOT_RUN.",
+      "code_paths": [
+        "src/oaer/gate/harm.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "sec-1.4-terciles",
+      "paper_location": "Table 3 panel b, Proposition 5",
+      "statement": "The graph prior contributes most where the exposed count is scarce: the lowest exposure tercile gains +3.2 Hits@20 from KG pretraining over random and +2.4 over no KG; the middle tercile +1.6 and +1.2; the highest tercile +0.4 and +0.3, about zero, and the per-drug DR-learner contrast there is -0.2.",
+      "verification": "src/oaer/ledger/ablations.py stores the tercile rows with their |D_eps| and trimmed fractions (1,104 / 6.8%, 3,318 / 2.1%, 5,210 / 0.7%); src/oaer/readings/interference.py implements the tercile split and the interaction read-outs; src/oaer/encoder/relational.py implements the log-degree scaling that produces the behaviour.",
+      "code_paths": [
+        "src/oaer/ledger/ablations.py",
+        "src/oaer/readings/interference.py",
+        "src/oaer/encoder/relational.py"
+      ],
+      "status": "NOT_RUN"
+    },
+    {
+      "claim_id": "sec-1.3-ten-seeds",
+      "paper_location": "Table 2 note",
+      "statement": "The P-versus-OAER column is a paired test across ten fixed seeds for the learned rows, so it tests optimisation noise rather than sampling uncertainty; the deterministic families and the transfer rows carry no across-seed dispersion, their seed standard deviations are undefined, and their P column is a one-sample test against a constant.",
+      "verification": "protocols/main.yaml: readings.seeds carries ten fixed seeds; src/oaer/readings/resampling.py implements the paired seed test and the site-stratified bootstrap; src/oaer/ledger/comparator_roster.py marks each row's provenance so the deterministic rows are handled as the note states.",
+      "code_paths": [
+        "src/oaer/readings/resampling.py",
+        "src/oaer/ledger/comparator_roster.py",
+        "protocols/main.yaml"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.7-hazard-ratio-adjustment",
+      "paper_location": "Sec. 2.7",
+      "statement": "The hazard ratios adjust for the prescribing set W~ together with performance status, sidedness, RAS, BRAF, microsatellite status, and the pattern and site of metastases; the propensity for agreement is built on W~ and not on the embedding.",
+      "verification": "src/oaer/policy/survival.py fits the Cox model on that covariate block; src/oaer/estimands/nuisance.py's PRESCRIBING_SET_ORDER and design_matrix define the block; the battery's check_cox_reference reproduces a Cox hazard ratio by a grid search on the written partial likelihood.",
+      "code_paths": [
+        "src/oaer/policy/survival.py",
+        "src/oaer/estimands/nuisance.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.5-e-value-scale",
+      "paper_location": "Sec. 2.5",
+      "statement": "The E-value is computed on the risk-ratio scale, as the ratio of the incidence probabilities within the same horizon taken from the same right-censored survival curves, and is not derived from hazard ratios.",
+      "verification": "src/oaer/estimands/sensitivity.py computes cumulative incidence and the risk ratio at the horizon before forming the E-value; the battery's check_e_value_closed_form compares the computed E-value against its closed form E = RR + sqrt(RR(RR-1)) and checks the reciprocal and the interval-containing-the-null rule; check_risk_ratio_reference rebuilds the ratio from a hand-built contingency.",
+      "code_paths": [
+        "src/oaer/estimands/sensitivity.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.5-no-real-comparator",
+      "paper_location": "Sec. 2.5",
+      "statement": "Where no real active comparator exists the protocol falls back to a new-user design with a non-user comparator, which is admissible only because the indication does not predict the outcome given the prescribing set.",
+      "verification": "src/oaer/estimands/cloning.py exposes NO_INITIATION as its own strategy rather than as the complement of an active comparator; src/oaer/estimands/nuisance.py fits the active comparator from the candidate's own approved indications and records the fallback; the module docstrings state the condition.",
+      "code_paths": [
+        "src/oaer/estimands/cloning.py",
+        "src/oaer/estimands/nuisance.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.6-complexity",
+      "paper_location": "Sec. 2.6",
+      "statement": "The algorithm runs in O(T1|E|h + T2 N a_bar h + F K n_d p_tilde + T3 M h) time and O((|V| + |E| + N a_bar) h) space, and inference costs O(K(h + log K)) time and O(K h) space per decision.",
+      "verification": "src/oaer/fitting/stages.py's stage records carry the step counts and parameter counts; src/oaer/gate/harm.py's docstring records the per-decision cost of the gate; the battery's check_study_end_to_end reports the realised Stage 3 steps on the smoke arm, so the estimate is grounded in a run rather than asserted.",
+      "code_paths": [
+        "src/oaer/fitting/stages.py",
+        "src/oaer/gate/harm.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PARTIAL"
+    },
+    {
+      "claim_id": "sec-2-compute-not-reported",
+      "paper_location": "Sec. 2 (Discussion), Sec. 2.6",
+      "statement": "The manuscript reports the frozen ranking took about eleven minutes per qualifying decision, interquartile range seven to eighteen, and was frozen for 96.4% of the qualifying decisions. It states no accelerator, no memory footprint and no training hardware.",
+      "verification": "protocols/main.yaml: compute carries accelerator 'not reported by the manuscript', peak_memory_gb null, and the three reported latency figures; the README's compute budget states the same, and no hardware claim is made anywhere in the tree.",
+      "code_paths": [
+        "protocols/main.yaml",
+        "README.md"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "sec-2.8-deidentification",
+      "paper_location": "Sec. 2.8",
+      "statement": "All records were anonymised at their site of origin before any analysis, direct identifiers removed, dates shifted per patient, free-text fields deleted and site identifiers replaced by pseudonymous codes; linkage is through a pseudonymous key only.",
+      "verification": "src/oaer/cohort/schema.py admits no free-text field and no direct identifier, and its numeric bounds reject anything outside the declared domain; the release ships no subject record at all, only the schema and the builder; the battery's check_no_workflow_files and the manifest sweep confirm no data file is committed.",
+      "code_paths": [
+        "src/oaer/cohort/schema.py",
+        "src/oaer/cohort/builder.py",
+        "src/oaer/validation/battery.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-1d-margin-reachability",
+      "paper_location": "Table 1 panel d note, Sec. 1 (the discrimination margin)",
+      "statement": "The discrimination margin is a pre-specified ordering margin set against the published spread of reproduced metastatic colorectal prognostic scores, and is not a minimal important difference. The sensitivity row reads the same margin against the best prospectively observed score and is not met, its lower limit 0.012 below the margin.",
+      "verification": "src/oaer/ledger/criteria.py derives the spread from the roster's own reproduced-reference rows rather than carrying a free constant, and exposes discrimination_margin_is_reachable; the battery's check_discrimination_margin_gap recomputes the spread and reports both cutoffs. On the reported panel the family spans 0.618 to 0.658, a width of 0.040, which is narrower than the 0.05 margin, so no member of that family can realise a difference of the margin's size and the sensitivity row's verdict is fixed by the arithmetic.",
+      "code_paths": [
+        "src/oaer/ledger/criteria.py",
+        "src/oaer/ledger/comparator_roster.py",
+        "src/oaer/validation/battery.py",
+        "tests/test_ledger.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "tab-3-sensitivity-row",
+      "paper_location": "Table 3 panel a (the sensitivity row)",
+      "statement": "The sensitivity row that removes the candidate-balanced weights reports the sparse fall that follows: a removal of 2.7 Hits@20 against the full configuration.",
+      "verification": "src/oaer/head/objectives.py's StageThreeWeights carries both forms, balanced and unbalanced, and src/oaer/console/ablate.py fits the no-candidate-balanced-weights configuration alongside the four component removals, so the row is reachable from the command line rather than carried only as data; tests/test_head.py asserts that neither weighting form assigns mass to a cell outside the eligible set.",
+      "code_paths": [
+        "src/oaer/head/objectives.py",
+        "src/oaer/console/ablate.py",
+        "src/oaer/ledger/ablations.py",
+        "tests/test_head.py"
+      ],
+      "status": "PASS"
+    },
+    {
+      "claim_id": "outputs-path-evidence",
+      "paper_location": "Sec. 2.4 (outputs), Algorithm 3 line 13",
+      "statement": "Each ranked entry carries its interval, its drug-target-pathway path to the patient's altered pathways, its exposed count, its propensity range and its trimmed fraction.",
+      "verification": "src/oaer/gate/harm.py's PathEvidence carries all five members and apply_gate attaches them to every ranked entry; src/oaer/study.py builds the evidence from the candidate's mechanism path, the exposed counts, the row's propensities and the trimmed fraction; tests/test_gate.py asserts the attachment.",
+      "code_paths": [
+        "src/oaer/gate/harm.py",
+        "src/oaer/study.py",
+        "tests/test_gate.py"
+      ],
+      "status": "PASS"
+    }
+  ],
+  "deviations": [
+    {
+      "item": "candidate_count = 24",
+      "paper_location": "Sec. 2.2, Sec. 2.3 (|D| = K)",
+      "departs": "The manuscript states the admission rule and names four agents but never prints the size of the directory it scored, so K is unresolved in the text. The release scores 24 candidates.",
+      "why": "A directory of the full non-oncology formulary cannot be assembled from the private arm, and the article's own panel c reports seven rows plus a further-identified block. 24 is chosen so the whole protocol, including the ablation sweep, completes on one CPU; it is a declared engineering default in protocols/main.yaml, not a reported value."
+    },
+    {
+      "item": "catalogue sizes (612 non-oncology indications, 96 oncology-only exclusions, 7 relations, 4 anchor types, motif orders [2, 3], 12 negative samples, 5 anchor corruptions)",
+      "paper_location": "Sec. 2.2, Sec. 2.4",
+      "departs": "The manuscript fixes the admission rule, the anchor types and the seven relations, but not the size of the indication vocabulary, the motif order set or the negative-sample count used in pretraining.",
+      "why": "The relation and anchor counts are the article's; the sizes of the constructed vocabulary and the sampling counts are declared defaults, recorded under the catalogue block of every protocol so a reader can change them without touching code."
+    },
+    {
+      "item": "emulation hyperparameters: trimming_epsilon = 0.05, minimum_exposed = 40, censoring_floor = 0.05, regularisation = 1.0, placebo_candidates = 3",
+      "paper_location": "Sec. 2.3 (D_eps), Sec. 2.5, Algorithm 2 lines 8 and 11",
+      "departs": "The manuscript names the trimming rule, the minimum exposed count and the censoring floor as design parameters without printing their values.",
+      "why": "The rule is implemented exactly as stated and the thresholds are declared defaults in protocols/main.yaml. The folds (5), the new-user lookback (365 days), the horizon source and the grace windows (90/60/30 days) are the article's and are not defaults."
+    },
+    {
+      "item": "horizons_months = [8.0, 6.5, 5.5]",
+      "paper_location": "Sec. 2.5, Sec. 2.3 (t*_L)",
+      "departs": "The manuscript states the horizons are set from the real-world median progression-free survival per line rather than from trial medians, but does not print the three medians.",
+      "why": "The provenance rule is implemented as stated; the three values are declared defaults chosen to fall between the reported RMST values of Table 1 and the twelve-month landmark of the AUROC read-out, and are exposed under emulation.horizons_months."
+    },
+    {
+      "item": "encoder and head widths: embedding 64, hidden 64, 2 layers, 4 bases, dropout 0.1, route 32, modifier 16, pathology-only 12, L2 1e-4",
+      "paper_location": "Sec. 2.4",
+      "departs": "The manuscript names the encoder family and describes the head by its two routes and the zero-mean condition, but reports no widths.",
+      "why": "The family, the inductive property, the basis decomposition and the zero-mean condition are implemented as described; the capacities are declared defaults under encoder and head in every protocol."
+    },
+    {
+      "item": "gate parameters: miscoverage_alpha = 0.1, margin_delta = 0.0, transport_clip = 10.0, calibration_window_months = 12",
+      "paper_location": "Sec. 2.4 (Eq. (1)), Algorithm 1 line 10, Algorithm 3",
+      "departs": "The manuscript specifies the deferral rule, states the conformal calibration uses covariate-only weights on the most recent retrospective window of Sites A and B, and reports the trimming fraction and the miscoverage rather than the thresholds themselves.",
+      "why": "The rule, the weight design and the calibration window's provenance are implemented as described. The miscoverage level and the margin are declared defaults; rank_depth_k = 3 follows the article's k = 1 and k = 5 read-outs and its rank depth of three."
+    },
+    {
+      "item": "fitting schedule: batch 256, lr 3e-3, weight decay 1e-4, warm-up 50, 3000 total steps, grad clip 1.0, fp32, CPU, early-stop patience 8, stage epochs 4/4/40",
+      "paper_location": "Sec. 2.6",
+      "departs": "The manuscript describes the three stages, the loss functions, the early-stopping rule and the cross-fitting schedule, but reports no optimiser, batch size, learning rate or precision.",
+      "why": "Every structural element of Sec. 2.6 is implemented: the three losses of Eq. (3)-(5), the early stop on an inner fold's V3 and the freeze. The optimisation settings are declared engineering defaults under the fitting block; the effective batch is 256 and is printed in the README's compute budget with that provenance."
+    },
+    {
+      "item": "readings: seeds [11, 23, 37, 41, 59, 67, 73, 89, 97, 103], bootstrap_resamples = 400, bootstrap_confidence = 0.95",
+      "paper_location": "Table 2 note, Table 3 caption",
+      "departs": "The manuscript states the paired test runs across ten fixed seeds and that the interactions carry a site-stratified bootstrap 95% confidence interval, but prints neither the seeds nor the replicate count.",
+      "why": "Ten seeds are used, as reported; the bootstrap is site-stratified and draws with replacement inside each site, as reported. The specific seeds and the replicate count are declared defaults, and the bootstrap is checked for determinism under a fixed seed."
+    },
+    {
+      "item": "cohort decisions_per_patient = 1.84",
+      "paper_location": "Table 1 panel a",
+      "departs": "The manuscript reports patients and decisions per arm but not the ratio between them for the rescaled runs.",
+      "why": "The full-scale ratio of the reported arm is 7,962/4,318 = 1.844. The value is used only when a protocol rescales the arm to a smaller decision count; at the reported scale the reported counts are used directly."
+    },
+    {
+      "item": "compute_target: accelerator, memory and wall-clock for training not reported",
+      "paper_location": "Sec. 2, Sec. 2.6",
+      "departs": "The manuscript reports no GPU, no VRAM and no training wall-clock. It reports only the deployed inference latency (eleven minutes per qualifying decision, IQR 7-18) and the 96.4% frozen throughput.",
+      "why": "COMPUTE_NOT_REPORTED is carried verbatim rather than estimated: any hardware figure for training would be an invention. The README states the reported latency figures and the declared default device, and claims no others."
+    },
+    {
+      "item": "point form versus integral form of the first bracket of Eq. (2)",
+      "paper_location": "Eq. (2)",
+      "departs": "Eq. (2) writes the first bracket as Delta*_i Y~_i / G(Y~-_i | A, S). This release evaluates it as the integral int_0^{Y~} du / G(u | A, S) when the censoring floor is active.",
+      "why": "The two agree when the censoring survival is treated as constant over the follow-up; the point form is biased low for a horizon-capped restricted time, because a record censored past the horizon contributes nothing where it should contribute the horizon. The choice and its consequence are stated in the docstring of doubly_robust_pseudo_outcome and exercised by the identity check."
+    },
+    {
+      "item": "censoring-martingale augmentation off by default",
+      "paper_location": "Eq. (2) (the integral term)",
+      "departs": "The article's Algorithm 2 line 12 forms the martingale term; the release implements it and exposes it behind the augment flag, which the deployed configuration leaves off.",
+      "why": "The augmentation has mean zero only when the censoring model is correctly specified, and the deployed censoring model is a coarse grouped Kaplan-Meier. On the arm this release builds the augmentation moves the estimate by about +1.2 months where the unaugmented form lands within 0.07 months of the closed-form truth. Both readings are reported rather than one being silently preferred."
+    },
+    {
+      "item": "reference prognostic score is a ridge regression, not a named published model",
+      "paper_location": "Table 2 panel B, Table 1 panel b",
+      "departs": "The manuscript's reference row is a reproduced real-life multicentre Cox model; this release's reference is a ridge regression of the restricted time on the time-zero state and the backbone regimen.",
+      "why": "The published model's coefficients are not in the manuscript, and its cohort is private, so the reproduction is structural rather than numeric: a prognostic score on the same covariates, fitted out of fold and scored on the held-out site. Its role is to bound the ranking's contribution, and its direction is checked out of sample rather than its magnitude."
+    }
+  ],
+  "findings": [
+    {
+      "id": "F1",
+      "where": "src/oaer/ledger/comparator_roster.py",
+      "found_by": "tests/test_ledger.py, then the executed battery",
+      "defect": "best_unmarked_ranker() selected rows whose provenance string equalled the deployed row's, which is the single row it also excluded, so the helper raised ValueError on every call. The ten rows the article marks z were not recorded at all, so transfer_rows() was empty.",
+      "fix": "The transfer mark is recorded once per transfer family, transfer_rows() resolves to the article's ten z rows, and best_unmarked_ranker() selects the strongest row that is neither the deployed model nor a transfer row.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F2",
+      "where": "src/oaer/head/objectives.py",
+      "found_by": "tests/test_head.py",
+      "defect": "StageThreeWeights(balanced=False) returned unit weight for every cell, including cells outside the eligible set, which carry no valid pseudo-outcome. The flag was also unreachable: nothing in the tree constructed it, so the sensitivity row of Table 3 panel a had no executable configuration.",
+      "fix": "Both forms now weight only eligible cells and preserve the same total mass, and console/ablate.py fits the no-candidate-balanced-weights configuration alongside the four component removals.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F3",
+      "where": "src/oaer/head/modifiers.py",
+      "found_by": "tests/test_head.py",
+      "defect": "zero_mean_centre documented itself as leaving ineligible rows untouched, while it writes zero into them.",
+      "fix": "The docstring now states what the condition does: a row outside D_eps carries no modifier rather than a value the condition does not define.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F4",
+      "where": "src/oaer/ledger/criteria.py",
+      "found_by": "tests/test_ledger.py, then the executed battery",
+      "defect": "The spread the discrimination margin is read against was carried as a free constant of (0.641, 0.682). Recomputing it from the reproduced-reference rows the same ledger holds gives (0.618, 0.658), a width of 0.040.",
+      "fix": "The spread is derived from the roster's own reproduced-reference rows, and the battery's check_discrimination_margin_gap reports both cutoffs. The finding stands as an article-side arithmetic fact rather than being reconciled: the 0.05 ordering margin is wider than the whole reference family, so no member of it can realise a difference of that size and the sensitivity row's not-met verdict is forced by the arithmetic.",
+      "status": "REPORTED"
+    },
+    {
+      "id": "F5",
+      "where": "src/oaer/catalogue/sampling.py, src/oaer/encoder/propagation.py",
+      "found_by": "ruff (F841, ARG001) and the static pass",
+      "defect": "corruption_masks was defined but never called, subgraph_mask carried three unused parameters, and three call sites built a batch relation tensor they never read.",
+      "fix": "The dead helper is gone, subgraph_mask takes only the mask it uses, and the unread locals are removed.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F6",
+      "where": "pyproject.toml, src/oaer/*",
+      "found_by": "mypy --strict",
+      "defect": "The typed pass was configured with strict = true and then 41 error codes disabled, and one of the disabled codes did not exist, so mypy stopped before checking anything. Sixty real strict errors were hidden behind the configuration.",
+      "fix": "The disable list is gone and the sixty errors are repaired, chiefly by binding torch results to annotated locals and by writing the nuisance surface Eq. (2) reads as a Protocol. mypy --strict now reports no issues across the package.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F7",
+      "where": "src/oaer/cohort/builder.py",
+      "found_by": "the executed verification battery (check_exposure_prevalence)",
+      "defect": "The exposure draw added a confounding tilt to the reported rate's log-odds and averaged the result, so every named agent's marginal prevalence came out above the count Table 1 panel c reports: omeprazole 0.2398 against 0.2140, metformin 0.1810 against 0.1615, and the other two likewise. The builder claimed to hold the reported marginals.",
+      "fix": "The tilt is calibrated to a zero mean in probability by solving one intercept per candidate against the states the arm actually carries, so confounding is retained and the marginal prevalence is the reported one. The check now passes for all four agents within three binomial standard errors.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F8",
+      "where": "src/oaer/policy/survival.py, src/oaer/estimands/cloning.py, src/oaer/support/numerics.py",
+      "found_by": "the executed verification battery (check_rmst_closed_form)",
+      "defect": "The restricted mean integrated the Kaplan-Meier curve with a trapezoid rule on a fixed grid, which adds half of every drop, so a censoring-free restricted mean did not reduce to the sample mean of the capped times (4.8119 against 4.8214). A helper named trapezoid advertised itself as exact for a step function while computing a trapezoid, and was never called.",
+      "fix": "Both restricted means integrate the curve exactly over its own jump times, so the censoring-free case now agrees with the hand value to 9e-16. The unused helper is replaced by the step integral that is actually used.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F9",
+      "where": "src/oaer/validation/battery.py",
+      "found_by": "the executed verification battery (check_pipeline_effect_recovery)",
+      "defect": "The recovery check compared the fitted conditional effect against the restricted-mean difference evaluated at a fixed baseline hazard, which is a different quantity: the arm's own risk distribution lowers every agent's contrast by about a tenth. The benchmark also depended on the fitting code being right and on the arm's covariate distribution being irrelevant, neither of which holds.",
+      "fix": "The benchmark is the arm's own average conditional effect, computed in closed form per decision from the builder's published hazard parameterisation, and the criterion is a Bonferroni bound over the four agents rather than four unadjusted comparisons. The check now reports each agent's standardised gap.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F10",
+      "where": "src/oaer/validation/live.py",
+      "found_by": "the live resource probes",
+      "defect": "The GEO probe searched the delivered bytes of a gzipped series matrix for the accession, which can never match: the payload has to be inflated first. Transport failures were also reported as BLOCKED on the first error, so a single transient TLS hiccup was indistinguishable from an unreachable host.",
+      "fix": "The probe inflates a gzip payload before reading it and retries transport failures three times, while a served HTTP status is not retried. It also looks for a deposit's identifier in the file list as well as the title, because the Zenodo deposit's title does not carry the file stem.",
+      "status": "FIXED"
+    },
+    {
+      "id": "F11",
+      "where": "src/oaer/console/verify.py, src/oaer/validation/battery.py",
+      "found_by": "reading the driver against the report it writes",
+      "defect": "Two checks defined in the battery, the manifest's freshness and the shipped report's completeness, were never invoked by the driver, so the report never carried either verdict and the driver's own freshness test was invisible.",
+      "fix": "The driver appends both after the battery passes, which is why it must be run twice: on the first run there is no report or manifest to read yet, and the pair records that honestly; on a second run with the tree unchanged both pass, and the manifest covers the finished tree.",
+      "status": "FIXED"
+    }
+  ],
+  "verification": {
+    "how_to_run": "python3 -m oaer.console.verify --protocol protocols/main.yaml, twice; the two checks that read the driver's own artefacts can only pass on the second run",
+    "families": "code checks exercise this tree, manuscript checks re-derive the article's own tables, live checks read the auxiliary resources over the network; a manuscript discrepancy is reported beside the code verdict rather than merged into it",
+    "not_reproduced": [
+      "every cohort-level column of Tables 1-5, because the pooled arm of Sites A-C is private and is not redistributed",
+      "the trained weights of the deployed model",
+      "the auxiliary public cohorts, which are read at their source"
+    ]
+  }
+}

@@ -1,0 +1,96 @@
+Third-party notices
+===================
+
+This package is released under Apache-2.0. It bundles no third-party data. It
+reads, or can be pointed at, the resources listed below; each keeps its own terms
+and its own access route, and none of them is redistributed here.
+
+Candidate catalogue sources
+---------------------------
+
+ChEMBL
+  Version at the access date: ChEMBL_37, release date 2026-05-01, read back from
+  the status endpoint. Access route: public REST, no account required.
+  Licence: CC BY-SA 3.0. Source: https://www.ebi.ac.uk/chembl/
+  Role: approved indications and mechanism of action for the candidate directory.
+
+Open Targets Platform
+  Version at the access date: read back from the live GraphQL meta field.
+  Access route: public GraphQL endpoint, no account required. Licence: CC0 1.0.
+  Source: https://platform.opentargets.org
+  Role: target-disease association scores and the pathway layer of the graph.
+
+DrugCentral
+  Version: release current at the access date.
+  Access route: public download, no account required. Licence: CC BY-SA 4.0.
+  Source: https://drugcentral.org
+  Role: drug-target activity and the active-comparator indication catalogue.
+
+Public cohorts read for comparison
+----------------------------------
+
+TCGA-COADREAD (The Cancer Genome Atlas colorectal collection)
+  Access route: GDC open tier, no account required; open access data.
+  Licence: NIH Genomic Data Sharing terms as applied to the open tier.
+  Source: https://portal.gdc.cancer.gov
+  Role: adjacent-domain molecular and pathology cohort, 296 records in the
+  article's row for it.
+
+CPTAC-COAD (Clinical Proteomic Tumor Analysis Consortium colon collection)
+  Access route: GDC open tier; the cBioPortal study coad_cptac_2019 carries the
+  same 110 records. Licence: NIH terms as applied to the open tier.
+  Source: https://portal.gdc.cancer.gov and https://www.cbioportal.org
+  Role: adjacent-domain proteogenomic cohort. The open-tier release carries no
+  follow-up fields, so no concordance index is computed from it.
+
+MSK-IMPACT colorectal (cBioPortal study crc_msk_2017)
+  Access route: cBioPortal public API, no account required for the study table.
+  Licence: the study's own terms, restated on its cBioPortal page.
+  Source: https://www.cbioportal.org
+  Role: metastatic clinicogenomic cohort, 1,134 records.
+
+MSK-CHORD colorectal (cBioPortal study msk_chord_2024)
+  Access route: cBioPortal public API. Licence: the study's own terms.
+  Source: https://www.cbioportal.org
+  Role: metastatic real-world cohort, 2,316 colorectal records of 25,040.
+
+SurGen
+  Access route: Zenodo deposit 14047723, direct download, no account required.
+  Licence: CC BY 4.0. Source: https://zenodo.org/records/14047723
+  Role: pathology-only cohort; the deposit carries patch-level feature
+  embeddings rather than the slides themselves.
+
+GSE39582
+  Access route: GEO series matrix over FTP, no account required.
+  Licence: NCBI GEO terms of use.
+  Source: https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE39582
+  Role: transcriptomic adjacent-domain cohort, 585 records.
+
+TCGA-CRC-DX (Kather colorectal MSI versus MSS collection)
+  Access route: Zenodo deposit 2530835, direct download, no account required.
+  Licence: CC BY 4.0. Source: https://zenodo.org/records/2530835
+  Role: microsatellite classification sanity probe, 4,112 tiles.
+
+Resources that are not redistributed
+------------------------------------
+
+The private multi-centre arm is a set of existing clinical records from Sites A,
+B and C. The records were irreversibly anonymised at the sites that generated
+them, every re-linkage key was destroyed, and no patient row is carried by this
+package. Only the schema, the reported one-variable marginals and a
+schema-compatible builder are released. The trained weights of the deployed
+model are likewise not released.
+
+Resources deliberately absent
+-----------------------------
+
+PAIP2020 is never used as an evidence source, because its download sits behind a
+click-through research-use gate as the article states.
+
+Software dependencies
+---------------------
+
+NumPy (BSD-3-Clause), SciPy (BSD-3-Clause), scikit-learn (BSD-3-Clause),
+PyYAML (MIT), PyTorch (BSD-3-Clause), pytest (MIT), ruff (MIT), mypy (MIT),
+black (MIT), isort (MIT). Versions are pinned in requirements.txt and
+pyproject.toml.

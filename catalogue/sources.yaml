@@ -1,0 +1,43 @@
+# The auxiliary resources this package reads, with the version, licence and
+# access route each one carries. Nothing here is redistributed; the file records
+# what a live check should see and what role the resource plays.
+#
+# Ref: Sec. 2.2 (public auxiliary data and knowledge-graph construction).
+
+candidate_sources:
+  - name: ChEMBL
+    role: approved indications and mechanism of action
+    licence: CC BY-SA 3.0
+  - name: Open Targets Platform
+    role: target-disease association and pathway membership
+    licence: CC0 1.0
+  - name: DrugCentral
+    role: drug-target activity and the active-comparator catalogue
+    licence: CC BY-SA 4.0
+
+cohort_sources:
+  - name: TCGA-COADREAD
+    tier: open
+    role: adjacent-domain molecular and pathology cohort
+  - name: CPTAC-COAD
+    tier: open
+    role: adjacent-domain proteogenomic cohort, no follow-up fields
+  - name: MSK-IMPACT colorectal
+    tier: open
+    role: metastatic clinicogenomic cohort
+  - name: MSK-CHORD colorectal
+    tier: open
+    role: metastatic real-world cohort
+  - name: SurGen
+    tier: open
+    role: pathology-only cohort
+  - name: GSE39582
+    tier: open
+    role: transcriptomic adjacent-domain cohort
+  - name: TCGA-CRC-DX
+    tier: open
+    role: microsatellite classification sanity probe
+
+excluded:
+  - name: PAIP2020
+    reason: the download sits behind a click-through research-use gate

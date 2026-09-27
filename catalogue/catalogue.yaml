@@ -1,0 +1,47 @@
+# Candidate catalogue and typed knowledge graph.
+#
+# Ref: Sec. 2.2 (the admission rule), Sec. 2.3 (the typed anchors).
+
+admission:
+  rule: at least one approved indication is non-oncological
+  oncology_terms: carcinoma, sarcoma, lymphoma, leukaemia, myeloma, melanoma,
+    neoplasm, glioma, gastrointestinal stromal tumour, antineoplastic
+  prospective_floor: 150
+
+named_agents:
+  - label: metformin
+    drug_class: biguanide
+    active_comparator: dpp-4 inhibitor
+    indications: [type 2 diabetes mellitus, insulin resistance]
+  - label: bisoprolol
+    drug_class: beta-blocker
+    active_comparator: calcium-channel blocker
+    indications: [hypertension, angina pectoris]
+  - label: aspirin
+    drug_class: low-dose antiplatelet
+    active_comparator: clopidogrel
+    indications: [secondary prevention of cardiovascular events, stable angina]
+  - label: omeprazole
+    drug_class: proton-pump inhibitor
+    active_comparator: h2-receptor antagonist
+    indications: [gastro-oesophageal reflux disease, peptic ulcer]
+
+relations:
+  - has_target
+  - has_indication
+  - affects_pathway
+  - associated_with_disease
+  - pathway_membership
+  - anchor_of_type
+  - co_occurs_with
+
+anchors:
+  - molecular_alteration
+  - pathway
+  - disease
+  - record_concept
+
+rows_per_line:
+  first: 90
+  second: 60
+  third_plus: 30

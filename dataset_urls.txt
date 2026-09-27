@@ -1,0 +1,35 @@
+# Auxiliary resources the release reads.
+#
+# One link per line. Every link below was fetched and its content read back; a
+# link whose content did not match its card is not listed. Access date 2026-09-27.
+#
+# Each line records what the release's own probe saw when the tree was assembled.
+# The probe is `python3 -m oaer.console.verify`, which reports one entry per
+# resource under the `live` family in verification_report.json; the status after
+# the card is that entry's.
+#
+# Transport note: the GEO series matrix below is served over HTTPS on an NCBI FTP
+# host whose TLS handshake this Python build abandons with an unexpected EOF, so
+# the in-process probe reports it BLOCKED while the system HTTP client reads the
+# same URL in full. The content match recorded on that line was made with the
+# system client, not with the probe. Every other line is served by a host the
+# probe reads directly.
+#
+# The private multi-centre arm is deliberately absent: the cohort is held at the
+# three sites that generated it, is irreversibly anonymised there, and is never
+# redistributed. What ships instead is the schema and a schema-compatible
+# builder. PAIP2020 is also absent, because its download sits behind a
+# click-through research-use gate (Sec. 2.2).
+
+https://www.ebi.ac.uk/chembl/                                            # CC BY-SA 3.0; catalogue home. PASS
+https://www.ebi.ac.uk/chembl/api/data/status.json                        # CC BY-SA 3.0; ChEMBL_37, release date 2026-05-01 read back from the status endpoint. PASS
+https://platform.opentargets.org/                                        # CC0 1.0; data release and downloads. PASS
+https://api.platform.opentargets.org/api/v4/graphql                      # CC0 1.0; GraphQL endpoint, no account required; the meta field reads back. PASS
+https://drugcentral.org/                                                 # CC BY-SA 4.0; drug-target activity. PASS
+https://drugcentral.org/download                                         # CC BY-SA 4.0; bulk download route; the page carries its download block. PASS
+https://api.gdc.cancer.gov/projects/TCGA-COAD                            # NIH open tier; project_id read back as TCGA-COAD. PASS
+https://api.gdc.cancer.gov/projects/TCGA-READ                            # NIH open tier; project_id read back as TCGA-READ. PASS
+https://www.cbioportal.org/api/studies                                   # study-specific terms; 548 studies listed, msk_chord_2024 among them. PASS
+https://ftp.ncbi.nlm.nih.gov/geo/series/GSE39nnn/GSE39582/matrix/GSE39582_series_matrix.txt.gz  # NCBI GEO terms of use; 1,231,599 bytes, inflating to 4,391,767 characters whose header names GSE39582. Probe BLOCKED (transport); read back with the system client.
+https://zenodo.org/api/records/2530835                                   # CC BY 4.0; CRC_DX train and test slides present in the deposit's file list. PASS
+https://zenodo.org/api/records/14047723                                  # CC BY 4.0; SurGen patch-level UNI feature embeddings. PASS

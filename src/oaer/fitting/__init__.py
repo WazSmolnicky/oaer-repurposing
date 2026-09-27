@@ -1,0 +1,81 @@
+"""Fitting: the optimiser schedule, the training loop, checkpoints and the stages."""
+
+from __future__ import annotations
+
+from oaer.fitting.checkpoint import (
+    CheckpointPayload,
+    checkpoint_manifest,
+    load_state,
+    parameter_digest,
+    save_state,
+    summarise_checkpoint,
+    torch_state_equal,
+    verify_digest,
+)
+from oaer.fitting.loop import (
+    StepRecord,
+    Trainer,
+    TrainingConfig,
+    TrainingRun,
+    iterate_batches,
+    loss_decreased,
+    parameter_delta,
+    snapshot,
+)
+from oaer.fitting.optim import (
+    ScheduleConfig,
+    WarmupCosine,
+    build_optimiser,
+    clip_gradients,
+    learning_rate_at,
+    parameter_groups,
+)
+from oaer.fitting.stages import (
+    AnchorBatch,
+    StageBundle,
+    StageReport,
+    anchor_batches,
+    build_encoder,
+    fit_graph_stages,
+    graph_tensors,
+    masked_graph_tensors,
+    stage_one,
+    stage_three,
+    stage_two,
+)
+
+__all__ = [
+    "AnchorBatch",
+    "CheckpointPayload",
+    "ScheduleConfig",
+    "StageBundle",
+    "StageReport",
+    "StepRecord",
+    "Trainer",
+    "TrainingConfig",
+    "TrainingRun",
+    "WarmupCosine",
+    "anchor_batches",
+    "build_encoder",
+    "build_optimiser",
+    "checkpoint_manifest",
+    "clip_gradients",
+    "fit_graph_stages",
+    "graph_tensors",
+    "iterate_batches",
+    "learning_rate_at",
+    "load_state",
+    "loss_decreased",
+    "masked_graph_tensors",
+    "parameter_delta",
+    "parameter_digest",
+    "parameter_groups",
+    "save_state",
+    "snapshot",
+    "stage_one",
+    "stage_three",
+    "stage_two",
+    "summarise_checkpoint",
+    "torch_state_equal",
+    "verify_digest",
+]
